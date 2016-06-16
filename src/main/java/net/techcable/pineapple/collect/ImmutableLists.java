@@ -25,6 +25,7 @@ package net.techcable.pineapple.collect;
 import lombok.*;
 
 import java.lang.invoke.MethodHandle;
+import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -39,6 +40,17 @@ import static com.google.common.base.Preconditions.*;
 
 @ParametersAreNonnullByDefault
 public class ImmutableLists {
+    @Nonnull
+    public static <T, U> ImmutableList<U> transform(List<T> list, Function<T, U> transformer) {
+        ImmutableList.Builder<U> resultBuilder = builder(checkNotNull(list, "Null list").size());
+        list.forEach((oldElement) -> {
+            U newElement = checkNotNull(transformer, "Null transformer").apply(oldElement);
+            if (newElement == null) throw new NullPointerException("Transformer  " + transformer.getClass().getTypeName() + " returned null.");
+            resultBuilder.add(newElement);
+        });
+        return resultBuilder.build();
+    }
+
     @Nonnull
     public static <T, U> ImmutableList<U> transform(ImmutableList<T> list, Function<T, U> transformer) {
         ImmutableList.Builder<U> resultBuilder = builder(checkNotNull(list, "Null list").size());
