@@ -33,10 +33,13 @@ import com.google.common.collect.ImmutableList;
 
 import net.techcable.pineapple.SneakyThrow;
 import net.techcable.pineapple.reflection.Reflection;
+
 import static com.google.common.base.Preconditions.*;
 
 @ParametersAreNonnullByDefault
-public class ImmutableLists {
+public final class ImmutableLists {
+    private ImmutableLists() {}
+
     @Nonnull
     public static <T, U> ImmutableList<U> transform(List<T> list, Function<T, U> transformer) {
         ImmutableList.Builder<U> resultBuilder = builder(checkNotNull(list, "Null list").size());

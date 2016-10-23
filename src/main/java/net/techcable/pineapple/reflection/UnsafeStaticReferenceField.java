@@ -22,13 +22,12 @@
  */
 package net.techcable.pineapple.reflection;
 
-import static net.techcable.pineapple.reflection.Reflection.UNSAFE;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Objects;
 
 import com.google.common.base.Verify;
+
+import static net.techcable.pineapple.reflection.Reflection.UNSAFE;
 
 @SuppressWarnings("restriction")
 /* package */ final class UnsafeStaticReferenceField<V> extends UnsafePineappleField<Void, V> {

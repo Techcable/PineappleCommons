@@ -87,7 +87,7 @@ public abstract class PineappleField<T, V> {
 
     /**
      * Get the {@link Field} object corresponding to this field.
-     * 
+     *
      * @return the field object
      */
     public final Field getField() {
@@ -96,7 +96,7 @@ public abstract class PineappleField<T, V> {
 
     /**
      * Return the class that declared/owns this field.
-     * 
+     *
      * @return the class that owns this field
      */
     public final Class<T> getDeclaringClass() {
@@ -118,7 +118,7 @@ public abstract class PineappleField<T, V> {
 
     /**
      * Return if this field's type is a primitive type.
-     * 
+     *
      * @return if this field is a primitive type.
      * @see #getPrimitiveType() getPrimitiveType
      */
@@ -144,7 +144,7 @@ public abstract class PineappleField<T, V> {
 
     /**
      * Return if this field is a public field.
-     * 
+     *
      * @return if this field is a public field.
      */
     public final boolean isPublic() {
@@ -196,13 +196,13 @@ public abstract class PineappleField<T, V> {
      */
     @Nullable
     public abstract V getStatic();
-    
+
     /**
      * Return the value of this _primitive integer instance field_ in the specified instance.
      * <p>
      * This method doesn't support wrapper objects, other primitive types, or static fields,
      * only _primitive integer_ instance fields.
-     * If you need to support both primtive and object fields, or support other primitive types, 
+     * If you need to support both primitive and object fields, or support other primitive types,
      * use {@link #getBoxed(T)} to perform the appropriate conversions automatically.
      * </p>
      *
@@ -220,7 +220,7 @@ public abstract class PineappleField<T, V> {
      * <p>
      * This method doesn't support wrapper objects, other primitive types, or instance fields,
      * only _primitive integer_ static fields.
-     * If you need to support both primtive and object fields, or support other primitive types, 
+     * If you need to support both primitive and object fields, or support other primitive types,s
      * use {@link #getStaticBoxed(T)} to perform the appropriate conversions automatically.
      * </p>
      *
@@ -273,6 +273,7 @@ public abstract class PineappleField<T, V> {
      * Get the pineapple field corresponding to the specified field object.
      *
      * @param field the field to get the pineapple field for
+     * @return a pineapple field corresponding to the specified field object
      * @throws NullPointerException if the field is null
      * @throws SecurityException if the caller doesn't have access to the specified field.
      */
@@ -313,9 +314,10 @@ public abstract class PineappleField<T, V> {
 
     /**
      * Get the pineapple field named {@code name} in the specified class.
-     * 
-     * @param clazz the type to get the field from
+     *
+     * @param declaringType the type that declared the field
      * @param name  the name of the field
+     * @param <T> the type of the declaring class
      * @return the field with the specified name and class
      * @throws NullPointerException     if type or name is null
      * @throws IllegalArgumentException if a field with the given name doesn't exist
@@ -333,9 +335,12 @@ public abstract class PineappleField<T, V> {
 
     /**
      * Get the pineapple field named {@code name} with the type {@code fieldType} in the specified class.
-     * 
+     *
      * @param declaringType the type to get the field from
      * @param name  the name of the field
+     * @param fieldType the type of the field's valu
+     * @param <T> the type of the declaring class
+     * @param <V> the type of the field
      * @return the field with the specified name and class
      * @throws NullPointerException     if type or name is null
      * @throws IllegalArgumentException if a field with the given name and type doesn't exist

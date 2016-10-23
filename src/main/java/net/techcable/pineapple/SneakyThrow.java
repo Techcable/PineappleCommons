@@ -22,7 +22,9 @@
  */
 package net.techcable.pineapple;
 
-public class SneakyThrow {
+public final class SneakyThrow {
+    private SneakyThrow() {}
+
     public static AssertionError sneakyThrow(Throwable t) {
         return sneakyThrow0(t);
     }

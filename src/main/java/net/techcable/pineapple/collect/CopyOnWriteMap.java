@@ -108,6 +108,16 @@ public class CopyOnWriteMap<K, V> extends AbstractMap<K, V> implements Concurren
     }
 
     @Override
+    public boolean remove(Object key, Object value) {
+        checkNotNull(key, "Null key");
+        checkNotNull(value, "Null value");
+        synchronized (map) {
+            bakedMap = null;
+            return map.remove(key, value);
+        }
+    }
+
+    @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         checkNotNull(m, "Null bakedMap");
         synchronized (map) {
@@ -170,16 +180,6 @@ public class CopyOnWriteMap<K, V> extends AbstractMap<K, V> implements Concurren
         synchronized (map) {
             bakedMap = null;
             return map.putIfAbsent(key, value);
-        }
-    }
-
-    @Override
-    public boolean remove(Object key, Object value) {
-        checkNotNull(key, "Null key");
-        checkNotNull(value, "Null value");
-        synchronized (map) {
-            bakedMap = null;
-            return map.remove(key, value);
         }
     }
 

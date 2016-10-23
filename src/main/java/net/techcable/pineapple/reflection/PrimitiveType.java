@@ -42,15 +42,16 @@ public enum PrimitiveType {
     BOOLEAN(boolean.class, Boolean.class),
     VOID(void.class, Void.class);
 
-    private final Class<?> primitiveClass, referenceClass;
-    /* private */ PrimitiveType(Class<?> primitiveClass, Class<?> referenceClass) {
+    private final Class<?> primitiveClass;
+    private final Class<?> wrapperClass;
+    /* private */ PrimitiveType(Class<?> primitiveClass, Class<?> wrapperClass) {
         this.primitiveClass = checkNotNull(primitiveClass);
-        this.referenceClass = checkNotNull(referenceClass);
+        this.wrapperClass = checkNotNull(wrapperClass);
     }
 
     /**
-     * Return this primitive's class
-     * 
+     * Return this primitive's class.
+     *
      * @return this primitive's class
      */
     public Class<?> getPrimitiveClass() {
@@ -58,19 +59,22 @@ public enum PrimitiveType {
     }
 
     /**
-     * Return this primitive's reference class, that it is boxed into.
-     * 
-     * @return this primitive's reference class
+     * Return this primitive's wrapper class,
+     * that it is boxed into when it needs to be represented as an object.
+     *
+     * @return this primitive's wrapper class
      */
-    public Class<?> getReferenceClass() {
-        return referenceClass;
+    public Class<?> getWrapperClass() {
+        return wrapperClass;
     }
 
     /**
-     * Return if the primitive is a number.
+     * Return if the primitive type is numeric.
+     *
+     * @return if this primitive is a numeric type
      */
     public boolean isNumeric() {
-        return Number.class.isAssignableFrom(referenceClass);
+        return Number.class.isAssignableFrom(wrapperClass);
     }
 
     //
@@ -79,10 +83,13 @@ public enum PrimitiveType {
 
     /**
      * Return the primitive type of the specified class, or null if it isn't primitive.
+     *
+     * @param primitiveClass the class to get the primitive type of
+     * @return the primitive type of the class, or null if it isn't primitive
      */
     @Nullable
     public static PrimitiveType fromClass(Class<?> primitiveClass) {
-        String name = primitiveClass.getName(); 
+        String name = primitiveClass.getName();
         switch (name.charAt(0)) {
             case 'b':
                 // It's either boolean or byte
@@ -127,14 +134,18 @@ public enum PrimitiveType {
                     return PrimitiveType.VOID;
                 }
                 break;
+            default:
+                break;
         }
         assert !primitiveClass.isPrimitive();
         return null;
     }
 
     /**
-     * Return the PrimitiveType with the specified boxed type, or null if it's not a boxed primitive.
+     * Return the PrimitiveType with the specified boxed type,
+     * or null if it's not a boxed primitive type.
      *
+     * @param boxedClass the wrapper class to get the primitive type of
      * @return the primitive type of the specified boxed class, or null if none.
      */
     @Nullable
@@ -189,6 +200,8 @@ public enum PrimitiveType {
                         return PrimitiveType.VOID;
                     }
                     break;
+                default:
+                    break; // It's not a primitive
             }
         }
         assert !Primitives.wrap(boxedClass).isPrimitive();

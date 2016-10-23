@@ -37,21 +37,23 @@ import com.google.common.collect.ImmutableMap;
 import net.techcable.pineapple.SneakyThrow;
 import net.techcable.pineapple.reflection.PineappleField;
 import net.techcable.pineapple.reflection.Reflection;
+
 import static com.google.common.base.Preconditions.*;
 
 @ParametersAreNonnullByDefault
-public class ImmutableMaps {
+public final class ImmutableMaps {
+    private ImmutableMaps() {}
 
-    public static <K1, K2, V> ImmutableMap<K2, V> transformKeys(ImmutableMap<K1, V> original, Function<K1, K2> keyTransformer) {
+    public static <K, V, T> ImmutableMap<T, V> transformKeys(ImmutableMap<K, V> original, Function<K, T> keyTransformer) {
         return transform(original, keyTransformer, Function.identity());
     }
 
     @Nonnull
-    public static <K1, K2, V1, V2> ImmutableMap<K2, V2> transform(ImmutableMap<K1, V1> original, Function<K1, K2> keyTransformer, Function<V1, V2> valueTransformer) {
-        ImmutableMap.Builder<K2, V2> resultBuilder = builder(checkNotNull(original, "Null map").size());
+    public static <K, V, T, U> ImmutableMap<T, U> transform(ImmutableMap<K, V> original, Function<K, T> keyTransformer, Function<V, U> valueTransformer) {
+        ImmutableMap.Builder<T, U> resultBuilder = builder(checkNotNull(original, "Null map").size());
         forEach(original, (originalKey, originalValue) -> {
-            K2 newKey = checkNotNull(keyTransformer, "Null key transformer").apply(originalKey);
-            V2 newValue = checkNotNull(valueTransformer, "Null value transformer").apply(originalValue);
+            T newKey = checkNotNull(keyTransformer, "Null key transformer").apply(originalKey);
+            U newValue = checkNotNull(valueTransformer, "Null value transformer").apply(originalValue);
             resultBuilder.put(newKey, newValue);
         });
         return resultBuilder.build();

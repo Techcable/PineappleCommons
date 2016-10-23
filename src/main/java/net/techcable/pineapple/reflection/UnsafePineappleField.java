@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import sun.misc.Unsafe;
+
 import static com.google.common.base.Preconditions.*;
 import static net.techcable.pineapple.reflection.Reflection.UNSAFE;
 

@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import net.techcable.pineapple.SneakyThrow;
+
 import static com.google.common.base.Preconditions.*;
 
 @SuppressWarnings("restriction") // Let us use sun.misc.Unsafe
@@ -119,7 +120,7 @@ public final class Reflection {
             throw SneakyThrow.sneakyThrow(e); // Shouldn't happen
         }
     }
-    
+
     /**
      * Create an identical clone of the specified field object, with an independent access flag.
      * <p>
@@ -175,10 +176,11 @@ public final class Reflection {
 
     /**
      * The permsision to supress access checks in reflection.
-     *
+     * <p>
      * This permission is requried to access private methods and fields.
      * It is also used to guard access to {@link #aquireUnsafe},
-     * since that can also be used to bypass security/access checks.s
+     * since that can also be used to bypass security/access checks.
+     * </p>
      */
     /* package */ static final Permission SUPPRESS_ACCESS_CHECKS_PERMISSION = new ReflectPermission("suppressAccessChecks");
     @Nullable
@@ -195,7 +197,7 @@ public final class Reflection {
         }
         UNSAFE = unsafe;
     }
-    
+
     /**
      * Aquire the instance of {@link sun.misc.Unsafe}, or null if it can't be found.
      * <p>
@@ -208,6 +210,7 @@ public final class Reflection {
      * </p>
      *
      * @throws SecurityException if access to sun.misc.Unsafe is forbidden
+     * @return the instance of sun.misc.Unsafe
      */
     @Nullable
     public static sun.misc.Unsafe aquireUnsafe() {

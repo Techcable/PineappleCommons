@@ -1,6 +1,9 @@
 #Maven
 target
 
+# Checkstyle
+.checkstyle
+
 #IntelliJ
 .idea
 *.iml
