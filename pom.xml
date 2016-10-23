@@ -3,7 +3,7 @@
     <groupId>net.techcable</groupId>
     <artifactId>pineapple</artifactId>
     <name>PineappleCommons</name>
-    <version>1.0.0-beta1-SNAPSHOT</version>
+    <version>0.1.0-beta1-SNAPSHOT</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -19,14 +19,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.8</version>
-            <scope>provided</scope>
-            <!-- They aren't required to use lombok -->
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

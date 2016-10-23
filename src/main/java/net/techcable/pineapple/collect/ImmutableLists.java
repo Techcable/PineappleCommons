@@ -22,20 +22,17 @@
  */
 package net.techcable.pineapple.collect;
 
-import lombok.*;
-
 import java.lang.invoke.MethodHandle;
 import java.util.List;
 import java.util.function.Function;
+
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
+import net.techcable.pineapple.SneakyThrow;
 import net.techcable.pineapple.reflection.Reflection;
-
 import static com.google.common.base.Preconditions.*;
 
 @ParametersAreNonnullByDefault
@@ -69,11 +66,17 @@ public class ImmutableLists {
 
     private static final MethodHandle BUILDER_CONSTRUCTOR = Reflection.getConstructor(ImmutableList.Builder.class, int.class);
 
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
     @Nonnull
     public static <T> ImmutableList.Builder<T> builder(int size) {
         checkArgument(size >= 0, "Negative size %s", size);
-        return BUILDER_CONSTRUCTOR != null ? (ImmutableList.Builder<T>) BUILDER_CONSTRUCTOR.invokeExact(size) : ImmutableList.builder();
+        if (BUILDER_CONSTRUCTOR != null) {
+            try {
+                return (ImmutableList.Builder<T>) BUILDER_CONSTRUCTOR.invokeExact(size);
+            } catch (Throwable t) {
+                throw SneakyThrow.sneakyThrow(t);
+            }
+        } else {
+            return ImmutableList.builder();
+        }
     }
 }

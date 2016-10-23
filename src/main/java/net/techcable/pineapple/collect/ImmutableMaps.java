@@ -22,22 +22,21 @@
  */
 package net.techcable.pineapple.collect;
 
-import lombok.*;
-import lombok.experimental.*;
-
 import java.lang.invoke.MethodHandle;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import net.techcable.pineapple.reflection.FastField;
+import net.techcable.pineapple.SneakyThrow;
+import net.techcable.pineapple.reflection.PineappleField;
 import net.techcable.pineapple.reflection.Reflection;
-
 import static com.google.common.base.Preconditions.*;
 
 @ParametersAreNonnullByDefault
@@ -62,23 +61,30 @@ public class ImmutableMaps {
     // Dark Magic
     //
 
+    @SuppressWarnings("rawtypes")
     private static final Class<? extends ImmutableMap> REGULAR_IMMUTABLE_MAP_CLASS = Reflection.getClass("com.google.common.collect.RegularImmutableMap", ImmutableMap.class);
     private static final MethodHandle BUILDER_CONSTRUCTOR = Reflection.getConstructor(ImmutableMap.Builder.class, int.class);
-    @SuppressWarnings("unchecked")
-    private static final FastField<ImmutableMap, Map.Entry[]> ENTRIES_ARRAY_FIELD = REGULAR_IMMUTABLE_MAP_CLASS != null ? FastField.create("entries", (Class<ImmutableMap>) REGULAR_IMMUTABLE_MAP_CLASS, Map.Entry[].class) : null;
+    @SuppressWarnings("rawtypes")
+    private static final PineappleField<ImmutableMap, Map.Entry[]> ENTRIES_ARRAY_FIELD = REGULAR_IMMUTABLE_MAP_CLASS != null ? PineappleField.create(REGULAR_IMMUTABLE_MAP_CLASS, "entries", Map.Entry[].class) : null;
 
-    @SneakyThrows
-    @SuppressWarnings("unchecked") // Generics are a lie
     @Nonnull
     public static <K, V> ImmutableMap.Builder<K, V> builder(int initialCapacity) {
         checkArgument(initialCapacity >= 0, "Negative initial capacity %s");
-        return BUILDER_CONSTRUCTOR != null ? (ImmutableMap.Builder<K, V>) BUILDER_CONSTRUCTOR.invokeExact(initialCapacity) : ImmutableMap.builder();
+        if (BUILDER_CONSTRUCTOR != null) {
+            try {
+                return (ImmutableMap.Builder<K, V>) BUILDER_CONSTRUCTOR.invokeExact(initialCapacity);
+            } catch (Throwable t) {
+                throw SneakyThrow.sneakyThrow(t);
+            }
+        } else {
+            return ImmutableMap.builder();
+        }
     }
 
     @SuppressWarnings("unchecked")
     public static <K, V> void forEach(ImmutableMap<K, V> map, BiConsumer<? super K, ? super V> action) {
         checkNotNull(map, "Null map");
-        if (ENTRIES_ARRAY_FIELD != null && ENTRIES_ARRAY_FIELD.getDeclaringType().isInstance(map)) {
+        if (ENTRIES_ARRAY_FIELD != null && ENTRIES_ARRAY_FIELD.getDeclaringClass().isInstance(map)) {
             for (Map.Entry<K, V> entry : ENTRIES_ARRAY_FIELD.get(map)) {
                 K key = entry.getKey();
                 V value = entry.getValue();
