@@ -7,3 +7,5 @@ target
 #IntelliJ
 .idea
 *.iml
+*.ipr
+*.iws

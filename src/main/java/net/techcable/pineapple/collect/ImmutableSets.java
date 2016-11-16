@@ -22,25 +22,22 @@
  */
 package net.techcable.pineapple.collect;
 
-import lombok.*;
-
 import java.lang.invoke.MethodHandle;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import net.techcable.pineapple.SneakyThrow;
 import net.techcable.pineapple.reflection.Reflection;
 
 import static com.google.common.base.Preconditions.*;
 
-@ParametersAreNonnullByDefault
-public class ImmutableSets {
-    @Nonnull
+public final class ImmutableSets {
+    private ImmutableSets() {}
+
     public static <T, U> ImmutableSet<U> transform(Set<T> set, Function<T, U> transformer) {
         ImmutableSet.Builder<U> resultBuilder = builder(checkNotNull(set, "Null list").size());
         set.forEach((oldElement) -> {
@@ -51,7 +48,6 @@ public class ImmutableSets {
         return resultBuilder.build();
     }
 
-    @Nonnull
     public static <T, U> ImmutableSet<U> transform(ImmutableSet<T> set, Function<T, U> transformer) {
         ImmutableSet.Builder<U> resultBuilder = builder(checkNotNull(set, "Null set").size());
         ImmutableList<T> list = set.asList();
@@ -77,11 +73,17 @@ public class ImmutableSets {
 
     private static final MethodHandle BUILDER_CONSTRUCTOR = Reflection.getConstructor(ImmutableSet.Builder.class, int.class);
 
-    @SneakyThrows
     @SuppressWarnings("unchecked")
-    @Nonnull
     public static <T> ImmutableSet.Builder<T> builder(int size) {
         checkArgument(size >= 0, "Negative size %s", size);
-        return BUILDER_CONSTRUCTOR != null ? (ImmutableSet.Builder<T>) BUILDER_CONSTRUCTOR.invokeExact(size) : ImmutableSet.builder();
+        if (BUILDER_CONSTRUCTOR != null) {
+            try {
+                return (ImmutableSet.Builder<T>) BUILDER_CONSTRUCTOR.invokeExact(size);
+            } catch (Throwable t) {
+                throw SneakyThrow.sneakyThrow(t);
+            }
+        } else {
+            return ImmutableSet.builder();
+        }
     }
 }
