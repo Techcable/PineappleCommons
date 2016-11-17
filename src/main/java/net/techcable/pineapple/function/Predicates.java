@@ -232,7 +232,7 @@ public final class Predicates {
 
             @Override
             public Predicate negate() {
-                return ALWAYS_TRUE;
+                return ALWAYS_FALSE;
             }
 
             @Override
