@@ -160,7 +160,7 @@ public class CopyOnWriteMap<K, V> extends AbstractMap<K, V> implements Concurren
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
         checkNotNull(action, "Null action");
-        ImmutableMaps.forEach(bakedMap(), action);
+        bakedMap().forEach(action);
     }
 
     @Override
