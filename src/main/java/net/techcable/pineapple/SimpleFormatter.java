@@ -145,8 +145,6 @@ public final class SimpleFormatter {
     }
 
     private static String format0(@FormatPattern String format, String[] args, int approximateSize) {
-        assert format != null : "Null format string";
-        assert args != null : "Null argument array";
         assert approximateSize >= 0 : "Negative approximate size " + approximateSize;
         char[] resultBuilder = new char[approximateSize];
         int resultSize = 0;

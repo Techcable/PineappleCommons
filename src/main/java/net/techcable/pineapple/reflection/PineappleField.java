@@ -26,12 +26,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.util.Objects;
-
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+import com.google.common.collect.ImmutableList;
 
 import static com.google.common.base.Preconditions.*;
+import static net.techcable.pineapple.SimpleFormatter.*;
 
 /**
  * A reference to a class's field, which can be used to access its value.
@@ -169,7 +171,7 @@ public abstract class PineappleField<T, V> {
      * <p>
      * This method doesn't support primitive fields or static fields,
      * only _reference object_ instance fields.
-     * If you need to support both primtive and object fields,
+     * If you need to support both primitive and object fields,
      * use {@link #getBoxed(T)} to perform the appropriate conversions automatically.
      * </p>
      *
@@ -179,7 +181,6 @@ public abstract class PineappleField<T, V> {
      * @throws NullPointerException if the instance is null
      * @throws IllegalStateException if the field is static or is a primtive field
      */
-    @Nullable
     public abstract V get(T instance);
 
     /**
@@ -187,14 +188,13 @@ public abstract class PineappleField<T, V> {
      * <p>
      * This method doesn't support primitive fields or instance fields,
      * only _non-primitive_ static fields.
-     * If you need to support both primtive and object fields,
+     * If you need to support both primitive and object fields,
      * use {@link #getStaticBoxed()} to perform the appropriate conversions automatically.
      * </p>
      *
      * @return the current value of the field
      * @throws IllegalStateException if the field is not static or is a primtive field
      */
-    @Nullable
     public abstract V getStatic();
 
     /**
@@ -212,7 +212,6 @@ public abstract class PineappleField<T, V> {
      * @throws NullPointerException if the instance is null
      * @throws IllegalStateException if the field is static or isn't a primitive integer
      */
-    @Nullable
     public abstract int getInt(T instance);
 
     /**
@@ -221,23 +220,22 @@ public abstract class PineappleField<T, V> {
      * This method doesn't support wrapper objects, other primitive types, or instance fields,
      * only _primitive integer_ static fields.
      * If you need to support both primitive and object fields, or support other primitive types,s
-     * use {@link #getStaticBoxed(T)} to perform the appropriate conversions automatically.
+     * use {@link #getStaticBoxed()} to perform the appropriate conversions automatically.
      * </p>
      *
      * @return the current value of this integer field
      * @throws IllegalStateException if the field is static or isn't a primitive integer
      */
-    @Nullable
     public abstract int getStaticInt();
 
     /**
      * Return the value of this instance field in the specified object,
-     * automatically boxing primtives into the appropriate wrapper object.
+     * automatically boxing primitives into the appropriate wrapper object.
      * <p>
      * This method supports both primitive and object fields,
      * automatically boxing primitives into their corresponding wrapper objects.
      * This method only supports instance fields, not static fields.
-     * Static fields can be accessed with {@link #getBoxedStatic()}.
+     * Static fields can be accessed with {@link #getStaticBoxed()}.
      * </p>
      *
      * @param instance the instance to get the field's value from
@@ -246,12 +244,11 @@ public abstract class PineappleField<T, V> {
      * @throws NullPointerException if the instance is null
      * @throws IllegalStateException if this field is static.
      */
-    @Nullable
     public abstract V getBoxed(T instance);
 
     /**
      * Return the current value of this static field,
-     * automatically boxing primtives into the appropriate wrapper object.
+     * automatically boxing primitives into the appropriate wrapper object.
      * <p>
      * This method supports both primitive and object fields,
      * automatically boxing primitives into their corresponding wrapper objects.
@@ -262,8 +259,108 @@ public abstract class PineappleField<T, V> {
      * @return the current value of the field
      * @throws IllegalStateException if this field isn't static.
      */
-    @Nullable
     public abstract V getStaticBoxed();
+
+    /**
+     * Set the new value of this static field,
+     * automatically unboxing wrapper types into the appropriate primitive.
+     * <p>
+     * This method supports both primitive and object fields,
+     * automatically unboxing primitives into their corresponding wrapper objects.
+     * This method only supports static fields, not instance fields.
+     * Instance fields can be accessed with {@link #putBoxed(Object, Object)}.
+     * </p>
+     *
+     * @param value the new value of the field
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void putStaticBoxed(@Nullable V value);
+
+    /**
+     * Set the new value of this instance field,
+     * automatically unboxing wrapper types into the appropriate primitive type.
+     * <p>
+     * This method supports both primitive and object fields,
+     * automatically unboxing primitives into their corresponding wrapper objects.
+     * This method only supports instance fields, not static fields.
+     * Static fields can be accessed with {@link #putStaticBoxed(Object)}.
+     * </p>
+     *
+     * @param instance the instance of the class to set the field's value in
+     * @param value the new value of the field
+     * @throws ClassCastException if the given object isn't an instance of the declaring class
+     * @throws NullPointerException if the instance is null
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void putBoxed(T instance, @Nullable V value);
+
+    /**
+     * Set the new value of this _non-primitive_ instance field.
+     * <p>
+     * This method doesn't support primitive fields or static fields,
+     * only _reference object_ instance fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #putBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * </p>
+     *
+     * @param instance the instance of the class to set the field's value in
+     * @param value the new value of the field
+     * @throws ClassCastException if the given object isn't an instance of the declaring class
+     * @throws NullPointerException if the instance is null
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void put(T instance, @Nullable V value);
+
+    /**
+     * Set the new value of this _non-primitive_ static field.
+     * <p>
+     * This method doesn't support primitive fields or instance fields,
+     * only _reference object_ static fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #putStaticBoxed(Object)} to perform the appropriate conversions automatically.
+     * </p>
+     *
+     * @param value the new value of the field
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void putStatic(V value);
+
+
+    /**
+     * Set the new value of this _int primitive_ instance field.
+     * <p>
+     * This method doesn't support boxed integer fields or static fields,
+     * only _primitive integer_ instance fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #putBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * </p>
+     *
+     * @param instance the instance of the class to set the field's value in
+     * @param value the new value of the field
+     * @throws ClassCastException if the given object isn't an instance of the declaring class
+     * @throws NullPointerException if the instance is null
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void putInt(T instance, int value);
+
+    /**
+     * Set the new value of this _non-primitive_ static field.
+     * <p>
+     * This method doesn't support boxed integer fields or instance fields,
+     * only _primitive integer_ static fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #putBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * </p>
+     *
+     * @param value the new value of the field
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void putStaticInt(int value);
+
+    @Override
+    public String toString() {
+        return this.field.getDeclaringClass().getTypeName() + "." + this.field.getName();
+    }
 
     //
     // Static constructors and factories
@@ -338,7 +435,7 @@ public abstract class PineappleField<T, V> {
      *
      * @param declaringType the type to get the field from
      * @param name  the name of the field
-     * @param fieldType the type of the field's valu
+     * @param fieldType the type of the field's value
      * @param <T> the type of the declaring class
      * @param <V> the type of the field
      * @return the field with the specified name and class
@@ -352,9 +449,72 @@ public abstract class PineappleField<T, V> {
         try {
             field = checkNotNull(declaringType, "Null declaring type").getDeclaredField(checkNotNull(name, "Null fieldName"));
         } catch (NoSuchFieldException e) {
-            return null;
+            throw new IllegalArgumentException(format("Can't find field named '{}' in {}", name, declaringType.getTypeName()));
         }
         checkArgument(checkNotNull(fieldType, "Null field type").isAssignableFrom(field.getType()), "Field type %s doesn't equal expected field type %s", fieldType);
         return (PineappleField<T, V>) fromField(field);
+    }
+
+
+    /**
+     * Get the only field in the class with the given type
+     * <p>Throws an exception if no fields are found, or if multiple fields are found.</p>
+     *
+     * @param clazz the type to find the field in
+     * @param fieldType the type of the field
+     * @param <T> the type of the declaring class
+     * @param <V> the type of the field
+     * @return the only field
+     * @throws IllegalArgumentException if there is more than one field with the given type
+     * @throws IllegalArgumentException if not found
+     * @throws NullPointerException if any args are null
+     */
+    public static <T, V> PineappleField<T, V> findFieldWithType(Class<T> clazz, Class<V> fieldType) {
+        ImmutableList<PineappleField<T, V>> fields = findFieldsWithType(clazz, fieldType);
+        switch (fields.size()) {
+            case 1:
+                return fields.get(0);
+            case 0:
+                throw new IllegalArgumentException("Field in " + clazz + " not found with type " + fieldType);
+            default:
+                StringBuilder builder = new StringBuilder("Multiple fields found in ");
+                builder.append(clazz);
+                builder.append(" with type ");
+                builder.append(fieldType);
+                builder.append(": [");
+                for (int i = 0; i < fields.size(); i++) {
+                    PineappleField<T, V> field = fields.get(i);
+                    builder.append(field);
+                    if (i + 1 < fields.size()) { // Has more
+                        builder.append(", ");
+                    }
+                }
+                builder.append("] ");
+                throw new IllegalArgumentException(builder.toString());
+        }
+    }
+
+    /**
+     * Get the only field in the class with the given type
+     * @param clazz the type to find the field in
+     * @param fieldType the type of the field
+     * @param <T> the type of the declaring class
+     * @param <V> the type of the field
+     * @throws IllegalArgumentException if there is more than one field with the given type
+     * @throws IllegalArgumentException if not found
+     * @throws NullPointerException if any args are null
+     * @return all fields in the class with the given type
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, V> ImmutableList<PineappleField<T, V>> findFieldsWithType(Class<T> clazz, Class<V> fieldType) {
+        Preconditions.checkNotNull(clazz, "Null class");
+        Preconditions.checkNotNull(fieldType, "Null type");
+        ImmutableList.Builder<PineappleField<T, V>> builder = ImmutableList.builder();
+        for (Field field : clazz.getDeclaredFields()) {
+            if (Reflection.isLenientlyAssignableFrom(fieldType, field.getType())) {
+                builder.add((PineappleField<T, V>) fromField(field));
+            }
+        }
+        return builder.build();
     }
 }

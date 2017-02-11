@@ -24,10 +24,11 @@ package net.techcable.pineapple.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import javax.annotation.Nullable;
 
 import com.google.common.base.Verify;
 
-import static net.techcable.pineapple.reflection.Reflection.UNSAFE;
+import static net.techcable.pineapple.reflection.Reflection.*;
 
 @SuppressWarnings("restriction")
 /* package */ final class UnsafeStaticReferenceField<V> extends UnsafePineappleField<Void, V> {
@@ -55,5 +56,16 @@ import static net.techcable.pineapple.reflection.Reflection.UNSAFE;
     @Override
     public V getStaticBoxed() {
         return this.getStatic();
+    }
+
+
+    @Override
+    public void putStatic(@Nullable V value) {
+        UNSAFE.putObject(null, this.fieldOffset, value);
+    }
+
+    @Override
+    public void putStaticBoxed(@Nullable V value) {
+        this.putStatic(value);
     }
 }

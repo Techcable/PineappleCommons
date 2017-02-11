@@ -20,45 +20,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+/**
+ * Utilities for reflection
+ */
+@NonnullByDefault
 package net.techcable.pineapple.reflection;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import javax.annotation.Nullable;
-
-import com.google.common.base.Verify;
-
-import static net.techcable.pineapple.reflection.Reflection.*;
-
-@SuppressWarnings("restriction")
-/* package */ class UnsafeStaticIntegerField extends UnsafePineappleField<Void, Integer> {
-    /* package */ UnsafeStaticIntegerField(Field field) {
-        super(field);
-        Verify.verify(field.getType() == int.class);
-        Verify.verify(Modifier.isStatic(field.getModifiers()));
-    }
-
-    @Override
-    public int getStaticInt() {
-        /*
-         * Since we're a static field, we pass a null instance.
-         * The fieldOffset is actually an absolute memory location, not a offset.
-         */
-        return UNSAFE.getInt(null, this.fieldOffset);
-    }
-
-    @Override
-    public Integer getStaticBoxed() {
-        return this.getStaticInt();
-    }
-
-    @Override
-    public void putStaticInt(int value) {
-        UNSAFE.putInt(null, this.fieldOffset, value);
-    }
-
-    @Override
-    public void putStaticBoxed(@Nullable Integer value) {
-        this.putStaticInt(value);
-    }
-}
+import net.techcable.pineapple.NonnullByDefault;

@@ -23,6 +23,7 @@
 package net.techcable.pineapple.reflection;
 
 import java.lang.reflect.Field;
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -157,7 +158,7 @@ import static com.google.common.base.Preconditions.*;
          * Then, convert the errors into cleaner ones for the caller.
          * We still have to check that the field is a static field,
          * since the reflection API would otherwise allow a null instances.
-         * However, we do want to allow the implcit autoboxing here,
+         * However, we do want to allow the implicit autoboxing here,
          * since that's what this method is supposed to do.
          */
         try {
@@ -185,7 +186,7 @@ import static com.google.common.base.Preconditions.*;
          * We _do not_ have to check that the field is a static field,
          * since the reflection API is going to error if it is an instance field.
          * We also don't need to check for primitives,
-         * since we _want_ to allow the implcit autoboxing here.
+         * since we _want_ to allow the implicit autoboxing here.
          */
         try {
             return (V) super.field.get(null);
@@ -202,5 +203,63 @@ import static com.google.common.base.Preconditions.*;
                 e
             );
         }
+    }
+
+    @Override
+    public void putStaticBoxed(@Nullable V value) {
+        try {
+            super.field.set(null, value);
+        } catch (NullPointerException e) {
+            /*
+             * Maybe we were are actually an instance field.
+             * Check that we are a static field and throw an error if not.
+             */
+            checkState(this.isStatic(), "Field is not a static field!");
+            throw e; // Unexpected NPE
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(
+                    "Unexpected error accessing field: " + this,
+                    e
+            );
+        }
+    }
+
+    @Override
+    public void putBoxed(T instance, @Nullable V value) {
+        try {
+            super.field.set(instance, value);
+        } catch (NullPointerException e) {
+            /*
+             * Maybe we were are actually an instance field.
+             * Check that we are a static field and throw an error if not.
+             */
+            checkState(this.isStatic(), "Field is not a static field!");
+            throw e; // Unexpected NPE
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(
+                    "Unexpected error accessing field: " + this,
+                    e
+            );
+        }
+    }
+
+    @Override
+    public void put(T instance, @Nullable V value) {
+
+    }
+
+    @Override
+    public void putStatic(@Nullable V value) {
+
+    }
+
+    @Override
+    public void putInt(T instance, int value) {
+
+    }
+
+    @Override
+    public void putStaticInt(int value) {
+
     }
 }

@@ -3,7 +3,7 @@
     <groupId>net.techcable</groupId>
     <artifactId>pineapple</artifactId>
     <name>PineappleCommons</name>
-    <version>0.1.0-beta1</version>
+    <version>0.1.0-beta2</version>
 
     <properties>
         <java.version>1.8</java.version>

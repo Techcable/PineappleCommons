@@ -24,11 +24,12 @@ package net.techcable.pineapple.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import javax.annotation.Nullable;
 
 import sun.misc.Unsafe;
 
 import static com.google.common.base.Preconditions.*;
-import static net.techcable.pineapple.reflection.Reflection.UNSAFE;
+import static net.techcable.pineapple.reflection.Reflection.*;
 
 /**
  * Abstract type for all fields implemented using {@link sun.misc.Unsafe}, with default implementations.
@@ -62,60 +63,68 @@ import static net.techcable.pineapple.reflection.Reflection.UNSAFE;
     public V get(T instance) {
         checkState(!this.isPrimitive(), "Field is primitive!");
         checkState(!this.isStatic(), "Field is static!");
-        /*
-         * It's not a primitive field, and it's not a static field.
-         * They should override this method if it could possibly ever be successful.
-         */
-        throw new UnsupportedOperationException(
-            "Type "
-            + getClass()
-            + " didn't implement get(), even though it's a non-primitive instance field!"
-        );
+        throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
     public V getStatic() {
         checkState(!this.isPrimitive(), "Field is primitive!");
         checkState(this.isStatic(), "Field is not static!");
-        /*
-         * It's not a primitive field, and it's not a static field.
-         * They should override this method if it could possibly ever be successful.
-         */
-        throw new UnsupportedOperationException(
-            "Type "
-            + getClass()
-            + " didn't implement getStatic(), even though it's a non-primitive static field!"
-        );
+        throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
     public int getInt(T instance) {
         checkState(this.primitiveType == PrimitiveType.INT, "Field isn't a primitive integer!");
         checkState(!this.isStatic(), "Field is static!");
-        /*
-         * It's not a primitive field, and it's not a static field.
-         * They should override this method if it could possibly ever be successful.
-         */
-        throw new UnsupportedOperationException(
-            "Type "
-            + getClass()
-            + " didn't implement getInt(), even though it's a primitive integer instance field!"
-        );
+        throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
     public int getStaticInt() {
         checkState(this.primitiveType == PrimitiveType.INT, "Field isn't a primitive integer!");
         checkState(this.isStatic(), "Field is not static!");
-        /*
-         * It's not a primitive field, and it's not a static field.
-         * They should override this method if it could possibly ever be successful.
-         */
-        throw new UnsupportedOperationException(
-            "Type "
-            + getClass()
-            + " didn't implement getStaticInt(), even though it's a primitive integer static field!"
-        );
+        throw new UnsupportedOperationException(getClass().getTypeName());
+    }
+
+    @Override
+    public void putStaticBoxed(@Nullable V value) {
+        checkState(this.isStatic(), "Field is not static!");
+        throw new UnsupportedOperationException(getClass().getTypeName());
+    }
+
+    @Override
+    public void putBoxed(T instance, @Nullable V value) {
+        checkState(!this.isStatic(), "Field is static!");
+        throw new UnsupportedOperationException(getClass().getTypeName());
+    }
+
+    @Override
+    public void put(T instance, @Nullable V value) {
+        checkState(!this.isPrimitive(), "Field is primitive!");
+        checkState(!this.isStatic(), "Field is static!");
+        throw new UnsupportedOperationException(getClass().getTypeName());
+    }
+
+    @Override
+    public void putStatic(@Nullable V value) {
+        checkState(!this.isPrimitive(), "Field is primitive!");
+        checkState(this.isStatic(), "Field is not static!");
+        throw new UnsupportedOperationException(getClass().getTypeName());
+    }
+
+    @Override
+    public void putInt(T instance, int value) {
+        checkState(this.primitiveType == PrimitiveType.INT, "Field isn't a primitive integer!");
+        checkState(!this.isStatic(), "Field is static!");
+        throw new UnsupportedOperationException(getClass().getTypeName());
+    }
+
+    @Override
+    public void putStaticInt(int value) {
+        checkState(this.primitiveType == PrimitiveType.INT, "Field isn't a primitive integer!");
+        checkState(this.isStatic(), "Field is not static!");
+        throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override

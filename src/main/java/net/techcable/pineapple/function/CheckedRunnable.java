@@ -20,38 +20,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.techcable.pineapple;
+package net.techcable.pineapple.function;
 
-import java.util.concurrent.Callable;
-
-import net.techcable.pineapple.function.CheckedRunnable;
-
-public final class SneakyThrow {
-    private SneakyThrow() {}
-
-    public static AssertionError sneakyThrow(Throwable t) {
-        return sneakyThrow0(t);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Throwable> AssertionError sneakyThrow0(Throwable t) throws T {
-        throw (T) t;
-    }
-
-    public static <V> V sneakyThrows(Callable<V> callable) {
-        try {
-            return callable.call();
-        } catch (Throwable t) {
-            throw sneakyThrow0(t);
-        }
-    }
-
-
-    public static void sneakyThrows(CheckedRunnable runnable) {
-        try {
-            runnable.run();
-        } catch (Throwable t) {
-            throw sneakyThrow0(t);
-        }
-    }
+@FunctionalInterface
+public interface CheckedRunnable<E extends Throwable> {
+    void run() throws E;
 }
