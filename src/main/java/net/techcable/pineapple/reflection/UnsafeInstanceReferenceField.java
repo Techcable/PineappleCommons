@@ -96,7 +96,7 @@ import static net.techcable.pineapple.reflection.Reflection.*;
          * it's actually a very fast intrinsic in the JIT.
          */
         this.declaringClass.cast(instance);
-        this.fieldType.cast(instance);
+        this.fieldType.cast(value);
         UNSAFE.putObject(instance, this.fieldOffset, value);
     }
 

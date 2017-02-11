@@ -24,7 +24,6 @@ package net.techcable.pineapple.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
@@ -376,6 +375,7 @@ public abstract class PineappleField<T, V> {
      */
     public static PineappleField<?, ?> fromField(Field field) {
         Objects.requireNonNull(field, "Null field");
+        field = Reflection.cloneField(field); // Defensive copy
         if (!Modifier.isPublic(field.getModifiers())) {
             /*
              * The field isn't public, so they're basically trying to suppress access checks.
@@ -383,8 +383,12 @@ public abstract class PineappleField<T, V> {
              * We don't care whether or not field.isAccessible(), since we wan't to check for permission again,
              * and we want to implicitly access private fields, without an explicit call to setAccessible.
              */
-            AccessController.checkPermission(Reflection.SUPPRESS_ACCESS_CHECKS_PERMISSION);
+            SecurityManager securityManager = System.getSecurityManager();
+            if (securityManager != null) {
+                securityManager.checkPermission(Reflection.SUPPRESS_ACCESS_CHECKS_PERMISSION);
+            }
         }
+        field.setAccessible(true);
         final boolean isStatic = Modifier.isStatic(field.getModifiers());
         final Class<?> fieldType = field.getType();
         if (Reflection.UNSAFE != null) {

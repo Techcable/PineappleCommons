@@ -61,6 +61,7 @@ import static net.techcable.pineapple.reflection.Reflection.*;
 
     @Override
     public void putStatic(@Nullable V value) {
+        this.fieldType.cast(value);
         UNSAFE.putObject(null, this.fieldOffset, value);
     }
 

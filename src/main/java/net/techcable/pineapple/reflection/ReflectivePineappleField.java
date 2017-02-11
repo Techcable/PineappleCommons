@@ -162,7 +162,7 @@ import static com.google.common.base.Preconditions.*;
          * since that's what this method is supposed to do.
          */
         try {
-            return (V) super.field.get(null);
+            return (V) super.field.get(instance);
         }  catch (NullPointerException e) {
             checkNotNull(instance, "Null instance"); // Check for null instance
             throw e; // Unexpected NPE

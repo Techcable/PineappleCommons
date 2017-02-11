@@ -29,7 +29,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ReflectPermission;
-import java.security.AccessController;
 import java.security.Permission;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -79,7 +78,7 @@ public final class Reflection {
             checkNotNull(declaringType, "Null declaring type");
             checkNotNull(name, "Null name");
             checkNotNull(parameterTypes, "Null parameter types");
-            Method reflectionMethod = declaringType.getMethod(name, parameterTypes);
+            Method reflectionMethod = declaringType.getDeclaredMethod(name, parameterTypes);
             reflectionMethod.setAccessible(true);
             return MethodHandles.lookup().unreflect(reflectionMethod);
         } catch (NoSuchMethodException e) {
@@ -108,7 +107,7 @@ public final class Reflection {
     public static MethodHandle tryGetConstructor(Class<?> declaringType, Class<?>... parameterTypes) {
         try {
             checkNotNull(parameterTypes, "Null parameters");
-            Constructor<?> constructor = checkNotNull(declaringType, "Null declaring type").getConstructor(parameterTypes);
+            Constructor<?> constructor = checkNotNull(declaringType, "Null declaring type").getDeclaredConstructor(parameterTypes);
             constructor.setAccessible(true);
             return MethodHandles.lookup().unreflectConstructor(constructor);
         } catch (NoSuchMethodException e) {
@@ -383,7 +382,10 @@ public final class Reflection {
      */
     @Nullable
     public static sun.misc.Unsafe acquireUnsafe() {
-        AccessController.checkPermission(SUPPRESS_ACCESS_CHECKS_PERMISSION);
+        SecurityManager securityManager = System.getSecurityManager();
+        if (securityManager != null) {
+            securityManager.checkPermission(SUPPRESS_ACCESS_CHECKS_PERMISSION);
+        }
         return UNSAFE;
     }
 }
