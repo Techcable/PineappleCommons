@@ -41,6 +41,8 @@ import static net.techcable.pineapple.reflection.Reflection.*;
  */
 @SuppressWarnings("restriction")
 /* package */ abstract class UnsafePineappleField<T, V> extends PineappleField<T, V> {
+    @Nullable
+    /* package */ final Object fieldBase;
     /* package */ final long fieldOffset;
 
     /* package */ UnsafePineappleField(Field field) {
@@ -56,7 +58,7 @@ import static net.techcable.pineapple.reflection.Reflection.*;
         super(field);
         checkArgument(fieldOffset != Unsafe.INVALID_FIELD_OFFSET, "Invalid field offset: " + fieldOffset);
         this.fieldOffset = fieldOffset;
-
+        this.fieldBase = isStatic() ? UNSAFE.staticFieldBase(field) : null;
     }
 
     @Override
@@ -88,40 +90,40 @@ import static net.techcable.pineapple.reflection.Reflection.*;
     }
 
     @Override
-    public void putStaticBoxed(@Nullable V value) {
+    public void forcePutStaticBoxed(@Nullable V value) {
         checkState(this.isStatic(), "Field is not static!");
         throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
-    public void putBoxed(T instance, @Nullable V value) {
+    public void forcePutBoxed(T instance, @Nullable V value) {
         checkState(!this.isStatic(), "Field is static!");
         throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
-    public void put(T instance, @Nullable V value) {
+    public void forcePut(T instance, @Nullable V value) {
         checkState(!this.isPrimitive(), "Field is primitive!");
         checkState(!this.isStatic(), "Field is static!");
         throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
-    public void putStatic(@Nullable V value) {
+    public void forcePutStatic(@Nullable V value) {
         checkState(!this.isPrimitive(), "Field is primitive!");
         checkState(this.isStatic(), "Field is not static!");
         throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
-    public void putInt(T instance, int value) {
+    public void forcePutInt(T instance, int value) {
         checkState(this.primitiveType == PrimitiveType.INT, "Field isn't a primitive integer!");
         checkState(!this.isStatic(), "Field is static!");
         throw new UnsupportedOperationException(getClass().getTypeName());
     }
 
     @Override
-    public void putStaticInt(int value) {
+    public void forcePutStaticInt(int value) {
         checkState(this.primitiveType == PrimitiveType.INT, "Field isn't a primitive integer!");
         checkState(this.isStatic(), "Field is not static!");
         throw new UnsupportedOperationException(getClass().getTypeName());

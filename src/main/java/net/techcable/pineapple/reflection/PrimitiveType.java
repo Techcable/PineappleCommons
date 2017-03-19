@@ -22,6 +22,7 @@
  */
 package net.techcable.pineapple.reflection;
 
+import java.util.Locale;
 import javax.annotation.Nullable;
 
 import com.google.common.primitives.Primitives;
@@ -206,5 +207,10 @@ public enum PrimitiveType {
         }
         assert !Primitives.wrap(boxedClass).isPrimitive();
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return name().toLowerCase(Locale.ROOT);
     }
 }

@@ -79,7 +79,6 @@ import static com.google.common.base.Preconditions.*;
              * Maybe we were are actually an instance field.
              * Check that we are a static field and throw an error if not.
              */
-
             checkState(this.isStatic(), "Field is not a static field!");
             throw e; // Unexpected NPE
         } catch (IllegalAccessException e) {
@@ -206,7 +205,7 @@ import static com.google.common.base.Preconditions.*;
     }
 
     @Override
-    public void putStaticBoxed(@Nullable V value) {
+    public void forcePutStaticBoxed(@Nullable V value) {
         try {
             super.field.set(null, value);
         } catch (NullPointerException e) {
@@ -225,7 +224,7 @@ import static com.google.common.base.Preconditions.*;
     }
 
     @Override
-    public void putBoxed(T instance, @Nullable V value) {
+    public void forcePutBoxed(T instance, @Nullable V value) {
         try {
             super.field.set(instance, value);
         } catch (NullPointerException e) {
@@ -244,22 +243,22 @@ import static com.google.common.base.Preconditions.*;
     }
 
     @Override
-    public void put(T instance, @Nullable V value) {
+    public void forcePut(T instance, @Nullable V value) {
 
     }
 
     @Override
-    public void putStatic(@Nullable V value) {
+    public void forcePutStatic(@Nullable V value) {
 
     }
 
     @Override
-    public void putInt(T instance, int value) {
+    public void forcePutInt(T instance, int value) {
 
     }
 
     @Override
-    public void putStaticInt(int value) {
+    public void forcePutStaticInt(int value) {
 
     }
 }

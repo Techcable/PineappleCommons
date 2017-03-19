@@ -69,7 +69,7 @@ import static net.techcable.pineapple.reflection.Reflection.*;
     }
 
     @Override
-    public void putInt(T instance, int value) {
+    public void forcePutInt(T instance, int value) {
         /*
          * A null instance will not error or crash the VM, but will fail silently (like in C).
          * The `fieldOffset` will be treated as an absolute memory address instead of an offset.
@@ -93,7 +93,7 @@ import static net.techcable.pineapple.reflection.Reflection.*;
     }
 
     @Override
-    public void putBoxed(T instance, @Nullable Integer value) {
-        this.putInt(instance, value);
+    public void forcePutBoxed(T instance, @Nullable Integer value) {
+        this.forcePutInt(instance, value);
     }
 }

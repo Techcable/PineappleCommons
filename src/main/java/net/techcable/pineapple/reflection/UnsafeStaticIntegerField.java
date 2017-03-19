@@ -44,7 +44,7 @@ import static net.techcable.pineapple.reflection.Reflection.*;
          * Since we're a static field, we pass a null instance.
          * The fieldOffset is actually an absolute memory location, not a offset.
          */
-        return UNSAFE.getInt(null, this.fieldOffset);
+        return UNSAFE.getInt(this.fieldBase, this.fieldOffset);
     }
 
     @Override
@@ -53,12 +53,12 @@ import static net.techcable.pineapple.reflection.Reflection.*;
     }
 
     @Override
-    public void putStaticInt(int value) {
-        UNSAFE.putInt(null, this.fieldOffset, value);
+    public void forcePutStaticInt(int value) {
+        UNSAFE.putInt(this.fieldBase, this.fieldOffset, value);
     }
 
     @Override
-    public void putStaticBoxed(@Nullable Integer value) {
-        this.putStaticInt(value);
+    public void forcePutStaticBoxed(@Nullable Integer value) {
+        this.forcePutStaticInt(value);
     }
 }

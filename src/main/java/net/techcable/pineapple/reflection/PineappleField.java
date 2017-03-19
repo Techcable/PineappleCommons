@@ -26,8 +26,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 
@@ -54,6 +54,7 @@ import static net.techcable.pineapple.SimpleFormatter.*;
  * They can only be created by static factory methods in this class, or utilities in {@link Reflection}.
  * </p>
  */
+@ThreadSafe
 public abstract class PineappleField<T, V> {
     /* package */ final Field field;
     /* package */ final Class<T> declaringClass;
@@ -159,6 +160,15 @@ public abstract class PineappleField<T, V> {
      */
     public final boolean isStatic() {
         return Modifier.isStatic(modifiers);
+    }
+
+    /**
+     * Return if this field is a final field.
+     *
+     * @return if this field is final
+     */
+    public final boolean isFinal() {
+        return Modifier.isFinal(modifiers);
     }
 
     //
@@ -271,9 +281,33 @@ public abstract class PineappleField<T, V> {
      * </p>
      *
      * @param value the new value of the field
+     * @throws IllegalStateException if this field isn't static, or if the field is final.
+     */
+    public final void putStaticBoxed(@Nullable V value) {
+        checkState(!isFinal(), "Field is final!");
+        forcePutStaticBoxed(value);
+    }
+
+    /**
+     * Forcibly set the new value of this static field,
+     * automatically unboxing wrapper types into the appropriate primitive,
+     * and <i>ignoring whether or not it's a final field</i>
+     * <p>
+     * This method supports both primitive and object fields,
+     * automatically unboxing primitives into their corresponding wrapper objects.
+     * This method only supports static fields, not instance fields.
+     * Instance fields can be accessed with {@link #forcePutBoxed(Object, Object)}.
+     * </p>
+     * <p>
+     * Since the java language forbids setting final fields,
+     * the JIT and compiler are free to optimize based on the assumption they never change.
+     * Changes forcibly made to a final field may never be seen, depending on optimization settings.
+     * </p>
+     *
+     * @param value the new value of the field
      * @throws IllegalStateException if this field isn't static.
      */
-    public abstract void putStaticBoxed(@Nullable V value);
+    public abstract void forcePutStaticBoxed(@Nullable V value);
 
     /**
      * Set the new value of this instance field,
@@ -282,16 +316,43 @@ public abstract class PineappleField<T, V> {
      * This method supports both primitive and object fields,
      * automatically unboxing primitives into their corresponding wrapper objects.
      * This method only supports instance fields, not static fields.
-     * Static fields can be accessed with {@link #putStaticBoxed(Object)}.
+     * Static fields can be accessed with {@link #forcePutStaticBoxed(Object)}.
      * </p>
      *
      * @param instance the instance of the class to set the field's value in
      * @param value the new value of the field
      * @throws ClassCastException if the given object isn't an instance of the declaring class
      * @throws NullPointerException if the instance is null
-     * @throws IllegalStateException if this field isn't static.
+     * @throws IllegalStateException if this field isn't static, or if the field is final.
      */
-    public abstract void putBoxed(T instance, @Nullable V value);
+    public final void putBoxed(T instance, @Nullable V value) {
+        checkState(!isFinal(), "Field is final!");
+        forcePutBoxed(instance, value);
+    }
+
+    /**
+     * Set the new value of this instance field,
+     * automatically unboxing wrapper types into the appropriate primitive type,
+     * and <i>ignoring whether or not it's a final field</i>
+     * <p>
+     * This method supports both primitive and object fields,
+     * automatically unboxing primitives into their corresponding wrapper objects.
+     * This method only supports instance fields, not static fields.
+     * Static fields can be accessed with {@link #forcePutStaticBoxed(Object)}.
+     * </p>
+     * <p>
+     * Since the java language forbids setting final fields,
+     * the JIT and compiler are free to optimize based on the assumption they never change.
+     * Changes forcibly made to a final field may never be seen, depending on optimization settings.
+     * </p>
+     *
+     * @param instance the instance of the class to set the field's value in
+     * @param value the new value of the field
+     * @throws ClassCastException if the given object isn't an instance of the declaring class
+     * @throws NullPointerException if the instance is null
+     * @throws IllegalStateException if this field isn't static, or if the field is final.
+     */
+    public abstract void forcePutBoxed(T instance, @Nullable V value);
 
     /**
      * Set the new value of this _non-primitive_ instance field.
@@ -306,32 +367,26 @@ public abstract class PineappleField<T, V> {
      * @param value the new value of the field
      * @throws ClassCastException if the given object isn't an instance of the declaring class
      * @throws NullPointerException if the instance is null
-     * @throws IllegalStateException if this field isn't static.
+     * @throws IllegalStateException if this field isn't static, or if the field is final.
      */
-    public abstract void put(T instance, @Nullable V value);
+    public final void put(T instance, @Nullable V value) {
+        checkState(!isFinal(), "Field is final!");
+        forcePut(instance, value);
+    }
 
     /**
-     * Set the new value of this _non-primitive_ static field.
+     * Set the new value of this _non-primitive_ instance field,
+     * <i>ignoring whether or not it's a final field</i>
      * <p>
-     * This method doesn't support primitive fields or instance fields,
-     * only _reference object_ static fields.
+     * This method doesn't support primitive fields or static fields,
+     * only _reference object_ instance fields.
      * If you need to support both primitive and object fields,
-     * use {@link #putStaticBoxed(Object)} to perform the appropriate conversions automatically.
+     * use {@link #forcePutBoxed(Object, Object)} to perform the appropriate conversions automatically.
      * </p>
-     *
-     * @param value the new value of the field
-     * @throws IllegalStateException if this field isn't static.
-     */
-    public abstract void putStatic(V value);
-
-
-    /**
-     * Set the new value of this _int primitive_ instance field.
      * <p>
-     * This method doesn't support boxed integer fields or static fields,
-     * only _primitive integer_ instance fields.
-     * If you need to support both primitive and object fields,
-     * use {@link #putBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * Since the java language forbids setting final fields,
+     * the JIT and compiler are free to optimize based on the assumption they never change.
+     * Changes forcibly made to a final field may never be seen, depending on optimization settings.
      * </p>
      *
      * @param instance the instance of the class to set the field's value in
@@ -340,7 +395,87 @@ public abstract class PineappleField<T, V> {
      * @throws NullPointerException if the instance is null
      * @throws IllegalStateException if this field isn't static.
      */
-    public abstract void putInt(T instance, int value);
+    public abstract void forcePut(T instance, @Nullable V value);
+
+    /**
+     * Set the new value of this _non-primitive_ static field.
+     * <p>
+     * This method doesn't support primitive fields or instance fields,
+     * only _reference object_ static fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #forcePutStaticBoxed(Object)} to perform the appropriate conversions automatically.
+     * </p>
+     *
+     * @param value the new value of the field
+     * @throws IllegalStateException if this field isn't static, or if the field is final.
+     */
+    public final void putStatic(V value) {
+        checkState(!isFinal(), "Field is final!");
+        forcePutStatic(value);
+    }
+
+    /**
+     * Set the new value of this _non-primitive_ static field,
+     * <i>ignoring whether or not it's a final field</i>
+     * <p>
+     * This method doesn't support primitive fields or instance fields,
+     * only _reference object_ static fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #forcePutStaticBoxed(Object)} to perform the appropriate conversions automatically.
+     * </p>
+     * <p>
+     * Since the java language forbids setting final fields,
+     * the JIT and compiler are free to optimize based on the assumption they never change.
+     * Changes forcibly made to a final field may never be seen, depending on optimization settings.
+     * </p>
+     *
+     * @param value the new value of the field
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void forcePutStatic(V value);
+
+    /**
+     * Set the new value of this _int primitive_ instance field.
+     * <p>
+     * This method doesn't support boxed integer fields or static fields,
+     * only _primitive integer_ instance fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #forcePutBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * </p>
+     *
+     * @param instance the instance of the class to set the field's value in
+     * @param value the new value of the field
+     * @throws ClassCastException if the given object isn't an instance of the declaring class
+     * @throws NullPointerException if the instance is null
+     * @throws IllegalStateException if this field isn't static, or if the field is final.
+     */
+    public final void putInt(T instance, int value) {
+        checkState(!isFinal(), "Field is final!");
+        forcePutInt(instance, value);
+    }
+
+    /**
+     * Set the new value of this _int primitive_ instance field.
+     * <i>ignoring whether or not it's a final field</i>
+     * <p>
+     * This method doesn't support boxed integer fields or static fields,
+     * only _primitive integer_ instance fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #forcePutBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * </p>
+     * <p>
+     * Since the java language forbids setting final fields,
+     * the JIT and compiler are free to optimize based on the assumption they never change.
+     * Changes forcibly made to a final field may never be seen, depending on optimization settings.
+     * </p>
+     *
+     * @param instance the instance of the class to set the field's value in
+     * @param value the new value of the field
+     * @throws ClassCastException if the given object isn't an instance of the declaring class
+     * @throws NullPointerException if the instance is null
+     * @throws IllegalStateException if this field isn't static.
+     */
+    public abstract void forcePutInt(T instance, int value);
 
     /**
      * Set the new value of this _non-primitive_ static field.
@@ -348,13 +483,36 @@ public abstract class PineappleField<T, V> {
      * This method doesn't support boxed integer fields or instance fields,
      * only _primitive integer_ static fields.
      * If you need to support both primitive and object fields,
-     * use {@link #putBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * use {@link #forcePutBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * </p>
+     *
+     * @param value the new value of the field
+     * @throws IllegalStateException if this field isn't static, or if the field is final.
+     */
+    public final void putStaticInt(int value) {
+        checkState(!isFinal(), "Field is final!");
+        forcePutStaticInt(value);
+    }
+
+    /**
+     * Set the new value of this _non-primitive_ static field.
+     * <i>ignoring whether or not it's a final field</i>
+     * <p>
+     * This method doesn't support boxed integer fields or instance fields,
+     * only _primitive integer_ static fields.
+     * If you need to support both primitive and object fields,
+     * use {@link #forcePutBoxed(Object, Object)} to perform the appropriate conversions automatically.
+     * </p>
+     * <p>
+     * Since the java language forbids setting final fields,
+     * the JIT and compiler are free to optimize based on the assumption they never change.
+     * Changes forcibly made to a final field may never be seen, depending on optimization settings.
      * </p>
      *
      * @param value the new value of the field
      * @throws IllegalStateException if this field isn't static.
      */
-    public abstract void putStaticInt(int value);
+    public abstract void forcePutStaticInt(int value);
 
     @Override
     public String toString() {
@@ -511,8 +669,8 @@ public abstract class PineappleField<T, V> {
      */
     @SuppressWarnings("unchecked")
     public static <T, V> ImmutableList<PineappleField<T, V>> findFieldsWithType(Class<T> clazz, Class<V> fieldType) {
-        Preconditions.checkNotNull(clazz, "Null class");
-        Preconditions.checkNotNull(fieldType, "Null type");
+        checkNotNull(clazz, "Null class");
+        checkNotNull(fieldType, "Null type");
         ImmutableList.Builder<PineappleField<T, V>> builder = ImmutableList.builder();
         for (Field field : clazz.getDeclaredFields()) {
             if (Reflection.isLenientlyAssignableFrom(fieldType, field.getType())) {
