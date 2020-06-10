@@ -136,15 +136,7 @@
             <property name="tagOrder" value="@param, @return, @throws, @deprecated"/>
         </module>
         <module name="JavadocMethod">
-            <property name="allowThrowsTagsForSubclasses" value="true"/>
             <property name="validateThrows" value="true"/>
-            <!-- Some things (like IOException) are obvious -->
-            <property name="allowMissingThrowsTags" value="true"/>
-            <!-- Doing 'throws IOEXception, NullPointerException' is stupid.... -->
-            <property name="allowUndeclaredRTE" value="true"/>
-            <!-- We don't have to document _everything_ -->
-            <property name="allowMissingJavadoc" value="true"/>
-            <property name="allowMissingPropertyJavadoc	" value="true"/>
         </module>
         <module name="JavadocParagraph"/>
         <module name="JavadocTagContinuationIndentation"/>

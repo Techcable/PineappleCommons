@@ -3,6 +3,7 @@ target
 
 # Checkstyle
 .checkstyle
+.checkstyle-cache
 
 #IntelliJ
 .idea

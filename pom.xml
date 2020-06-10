@@ -3,7 +3,7 @@
     <groupId>net.techcable</groupId>
     <artifactId>pineapple</artifactId>
     <name>PineappleCommons</name>
-    <version>0.1.0-beta5</version>
+    <version>0.1.0-beta6</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -74,7 +74,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.17</version>
+                <version>3.1.1</version>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                     <failOnViolation>true</failOnViolation>
